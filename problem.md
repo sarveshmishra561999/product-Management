@@ -106,7 +106,7 @@
 ```text
         conqtvms
 ```
-### As per my understanding i face this issue during the assesment may be there are some other convetion related mistake or that have i mention may be my worng assumption
+### As per my understanding I found this issue during the assesment may be there are some other convetion related mistake or that have i mention may be my worng assumption
 
 
 # THANK YOU !!
