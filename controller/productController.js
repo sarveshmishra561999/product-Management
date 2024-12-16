@@ -1,33 +1,39 @@
-const productModel=require('../models/productModel')
-exports.fetchProducts=async (req,res)=>{
-    try {
-        console.log("request recieved")
-        const{
-            currentPage=1,
-            pageSize=10,
-            orderBy='createdAt',
-            orderDir='desc',
-            searchBy='',
-            searchFields=[],
-        }=req.query;
+const { fetchProducts } = require('../models/productModel');
+const { getPaginationParams } = require('../helpers/paginationHelper');
 
-        const params={
-            currentPage:parseInt(currentPage,10),
-            pageSize:parseInt(pageSize,10),
-            orderBy,
-            orderDir:orderDir.toLowerCase()==='asc' ? 'ASC':'DESC',
-            searchBy,
-            searchField:Array.isArray(searchFields) ? searchFields:[]
-        }
-        const {data,totalCount}=await productModel.getProducts(params)
-        res.status(200).json({
-            currentPage:params.currentPage,
-            pageSize:params.pageSize,
-            totalPages:Math.ceil(totalCount/params.pageSize),
-            totalCount,
-            data
-        })
-    } catch (error) {
-        res.status(500).json({message:error.message})
-    }
+async function getProducts(req, res) {
+  try {
+    const {
+      currentPage = 1,
+      pageSize = 10,
+      orderBy = 'createdAt',
+      orderDir = 'desc',
+      searchBy = '',
+      searchFields = [],
+    } = req.query;
+
+    const validOrderDir = orderDir.toLowerCase() === 'asc' ? 'ASC' : 'DESC';
+
+    const pagination = getPaginationParams(currentPage, pageSize);
+    const products = await fetchProducts({
+      ...pagination,
+      orderBy,
+      orderDir: validOrderDir,
+      searchBy,
+      searchFields: Array.isArray(searchFields) ? searchFields : [searchFields],
+    });
+
+    res.json({
+      currentPage: pagination.page,
+      pageSize: pagination.limit,
+      totalPages: Math.ceil(products.totalCount / pagination.limit),
+      totalCount: products.totalCount,
+      data: products.rows,
+    });
+  } catch (error) {
+    console.error('Error fetching products:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
 }
+
+module.exports = { getProducts };
